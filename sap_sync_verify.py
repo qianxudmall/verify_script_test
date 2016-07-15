@@ -18,7 +18,7 @@ SYNC_DATE = conf.DATE_TO_SYNC if not conf.DEFAULT_SYN_DATE else datetime.now().s
 default_args = {
     'owner': 'airflow',
     'depends_on_past': False,
-    'start_date': datetime(2016, 6, 24),
+    'start_date': datetime(2016,7,15),
     'email': ['xxx@dmall.com',],
     'email_on_failure': False,
     'email_on_retry': False,
@@ -46,7 +46,7 @@ templated_command = """
 """
 
 verify_store_item = BashOperator(
-    task_id='import_merchandise_data',
+    task_id='verify_store_item',
     bash_command=templated_command,
     params={
         'source_path': SOURCE_ENV,

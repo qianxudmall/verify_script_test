@@ -19,16 +19,16 @@ dic_merch = {'1':"标准",'2':"AOC", '3':"耗材",'4':"生鲜原材料",'5':"生
 dict_store_item={
     'store_id':'OrgNO',
     'item_code':'MerchID',
-    'category':'ClsCod',
+    # 'category':'ClsCode',
     'short_name':'SimpleName',
     # 'operation_mode':'OperationMode',
     # 'management_style':'ManagementStyle',
-    'high_stock_days':'HighStockDays' ,
-    'safe_stock_days':'SafeStockDays',
+    # 'high_stock_days':'HighStockDays' ,
+    # 'safe_stock_days':'SafeStockDays',
     'first_purchase_date':'FirstPurchaseDate',
     'last_purchase_date':'LastPurchaseDate',
-    'price_top_limit':'PriceUpLimit',
-    'price_bottom_limit':'PriceLowLimit',
+    # 'price_top_limit':'PriceUpLimit',
+    # 'price_bottom_limit':'PriceLowLimit',
     'chg_steelyard_price':'ChgSteelyardPrice',
     'is_steelyard_count':'IsSteelyardCount',
     'is_steelyard_sale':'IsSteelyardSale',
@@ -50,15 +50,30 @@ def test_record(record):
     for key,value in dict_store_item.items():
         if item.get(key) != record.find(value).text:
             logging.info('不一致field: %s' % key)
+
+    main_item = frappe.get_doc('Item',{'item_code':item_code})
+    if main_item.get('item_group') != record.find('ClsCode').text:
+        logging.info('不一致的filed: item_group')
     if item.get('operation_mode') != dic_oprt[record.find('OperationMode').text]:
         logging.info('不一致field: operation_mode')
 
     if item.get('management_style') != dic_oprt[record.find('ManagementStyle').text]:
-        logging.info('不一致field: operation_mode')
+        logging.info('不一致field: management_style')
 
     if item.get('merch_style') != dic_oprt[record.find('MerchStyle').text]:
-        logging.info('不一致field: operation_mode')
+        logging.info('不一致field: merch_style')
 
+    if int(item.get('high_stock_days')) != int(record.find('HighStockDays')):
+        logging.info('不一致field: height_stock_days')
+
+    if int(item.get('safe_stock_days')) != int(record.find('SafeStockDays')):
+        logging.info('不一致field: safe_stock_days')
+
+    if float(item.get('price_top_limit')) != float(record.find('PriceUpLimit')):
+        logging.info('不一致field: PriceUpLimit')
+
+    if float(item.get('price_bottom_limit')) != float(record.find('PriceLowLimit')):
+        logging.info('不一致field: PriceLowLimit')
 
 def parseXML(filename ):
     '''
