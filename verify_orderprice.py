@@ -5,6 +5,11 @@ import xml.etree.ElementTree as ET
 import os
 from datetime import datetime
 import logging
+logging.basicConfig(level=logging.INFO,
+    format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
+    datefmt='%a, %d %b %Y %H:%M:%S',
+    filename="logging.log"
+    )
 
 
 # dic_oprt = {'1':"自营",'3':"联营"}
@@ -45,32 +50,32 @@ def test_record(record):
     if db_result:
         item_code = db_result[0][0]
     else:
-        # logging.info('通过xml文件中的SSK和ExeBranch_ID在表tabItem Barcode中没有数据')
-        print '通过xml文件中的SKU=%s和ExeBranch_ID=%s' \
-              '在表tabItem Barcode中没有数据'%(orderprice_sku,record.find('ExeBranch_ID').text)
+        logging.info('通过xml文件中的SSK和ExeBranch_ID在表tabItem Barcode中没有数据')
+        # print '通过xml文件中的SKU=%s和ExeBranch_ID=%s' \
+        #       '在表tabItem Barcode中没有数据'%(orderprice_sku,record.find('ExeBranch_ID').text)
     # 进价单位,查询item直接查询item表
-    if len(item_code):
+    if item_code:
         db_result = frappe.db.sql(
             """SELECT stock_uom FROM `tabItem` WHERE item_code=%s""" % item_code)
         if db_result:
             pass
         else:
-            # logging.info('not file in tabItem')
-            print 'not record in tabItem'
+            logging.info('not file in tabItem')
+            # print 'not record in Item'
 
-    if len(item_code) :
+    if item_code :
         price_rule = frappe.get_doc('Pricing Rule', item_code)
         if price_rule.get('valid_from') != record.find('StartDate').text:
-            # logging.info('起始时间不一致')
-            print '起始时间不一致'
+            logging.info('起始时间不一致')
+            # print '起始时间不一致'
         if price_rule.get('price') != record.find('NewOrderPrice').text:
-            # logging.info('price不一致')
-            print 'price不一致'
+            logging.info('price不一致')
+            # print 'price不一致'
         store_db_result = frappe.db.sql('SELECT name FROM `tabSupplier` WHERE supplier_id=%s'
                                         % record.find('SupplierCode').text)
         if price_rule.get('name') != store_db_result:
-            # logging.info('supplier不正确')
-            print 'supplier不正确'
+            logging.info('supplier不正确')
+            # print 'supplier不正确'
 
 
 def parseXML(filename ):
@@ -93,26 +98,26 @@ def main():
         if xml_file.find('REC_OrderPriceChg') != -1:
             file_count += 1
             filename = os.path.join(data_dir, xml_file)
-            #logging.info('处理第[%s]个文件: %s' % (file_count, filename))
-            print '处理第[%s]个文件: %s' % (file_count, filename)
+            logging.info('处理第[%s]个文件: %s' % (file_count, filename))
+            # print '处理第[%s]个文件: %s' % (file_count, filename)
             parseXML(filename)
     if file_count == 0:
-        # logging.info('当前日期没有OrgMerch文件!')
-        print '当前日期没有OrgMerch文件!'
+        logging.info('当前日期没有OrgMerch文件!')
+        # print '当前日期没有OrgMerch文件!'
 
 
 if __name__ == "__main__":
     try:
         frappe.connect('dmall')
-        # logging.info('connected to local site')
-        print 'connected to local site'
+        logging.info('connected to local site')
+        # print 'connected to local site'
 
         main()
 
     except Exception as e:
-        # logging.warning(e)
-        print e
+        logging.warning(e)
+        # print e
     finally:
         frappe.destroy()
-        #logging.info('frappe destroyed')
-        print 'frappe destroyed'
+        logging.info('frappe destroyed')
+        # print 'frappe destroyed'

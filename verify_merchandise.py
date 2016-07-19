@@ -1,17 +1,22 @@
 #!usr/bin/python 2.7
 # -*- coding: UTF-8 -*-
+
 import frappe
 import xml.etree.ElementTree as ET
 import os
 from datetime import datetime
 import logging
-
+logging.basicConfig(level=logging.INFO,
+    format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
+    datefmt='%a, %d %b %Y %H:%M:%S',
+    filename="logging.log"
+    )
 
 # dic_oprt = {'1':"自营",'3':"联营"}
 # dic_mang = {'1':"单品", '2':"金额", '3':"售价金额"}
 # dic_merch = {'1':"标准",'2':"AOC", '3':"耗材",'4':"生鲜原材料",'5':"生鲜",'6':"服务",'7':"包装"}
 # # dic_tax = {'0.17':"销项税%17-dmall",'0.13':"销项税%13-dmall",'0.07':"销项税%7-dmall"}
-# erp 和 sap 商品类型的 mapping 关系
+
 dict_type = {
     '0': '单一商品',
     '1': '共性商品',
@@ -46,19 +51,25 @@ dict_item= {
 
 def test_record(record):
     item_code = record.find('MerchID').text
-    # logging.info('对比门店商品: %s' % item_code)
-    print '对比门店商品: %s' % item_code
+    logging.info('对比门店商品: %s' % item_code)
+    # print '对比商品主数据: %s' % item_code
     # 若长度为9且有100的前缀, 则去掉100前缀
     if len(item_code) == 9 and item_code.startswith('100'):
-        item_code = 'item_code'[3:]
-    item = frappe.get_doc('Item',item_code)
-    for key,value in dict_item.items():
-        if item.get(key) != record.find(value).text:
-            # logging.info('不一致field: %s' % key)
-            print '不一致field: %s' % key
-    if item.get('type') != dic_type[record.find('Type').text]:
-        # logging.info('不一致field: type')
-        print '不一致field: type'
+        item_code = item_code[3:]
+    try:
+        item = frappe.get_doc('Item',item_code)
+    except Exception as e:
+        logging.info(e)
+    else:
+        for key,value in dict_item.items():
+            if item.get(key) != record.find(value).text:
+                logging.info('不一致field: %s' % key)
+                # print '不一致field: %s' % key
+        temp = item.get('type')
+        temp1 = int(record.find('Type').text)
+        if temp != temp1:
+            logging.info('商品类型不一样:%s和%s' %(dict_type[temp],dict_type[temp1]))
+            # print '商品类型不一样:%s和%s' %(dict_type[temp],dict_type[temp1])
 
 
 def parseXML(filename ):
@@ -81,27 +92,27 @@ def main():
         if xml_file.find('REC_Merchandise') != -1:
             file_count += 1
             filename = os.path.join(data_dir, xml_file)
-            #logging.info('处理第[%s]个文件: %s' % (file_count, filename))
-            print '处理第[%s]个文件: %s' % (file_count, filename)
+            logging.info('处理第[%s]个文件: %s' % (file_count, filename))
+            # print '处理第[%s]个文件: %s' % (file_count, filename)
 
             parseXML(filename)
     if file_count == 0:
-        # logging.info('当前日期没有OrgMerch文件!')
-        print '当前日期没有OrgMerch文件!'
+        logging.info('当前日期没有OrgMerch文件!')
+        # print '当前日期没有OrgMerch文件!'
 
 
 if __name__ == "__main__":
     try:
         frappe.connect('dmall')
-        # logging.info('connected to local site')
-        print 'connected to local site'
+        logging.info('connected to local site')
+        # print 'connected to local site'
 
         main()
 
     except Exception as e:
-        # logging.warning(e)
-        print e
+        logging.warning(e)
+        # print e
     finally:
         frappe.destroy()
-        #logging.info('frappe destroyed')
-        print 'frappe destroyed'
+        logging.info('frappe destroyed')
+        # print 'frappe destroyed'
