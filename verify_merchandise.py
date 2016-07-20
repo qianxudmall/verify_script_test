@@ -1,6 +1,6 @@
 #!usr/bin/python 2.7
 # -*- coding: UTF-8 -*-
-
+#练习git
 import frappe
 import xml.etree.ElementTree as ET
 import os
