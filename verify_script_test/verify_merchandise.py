@@ -2,6 +2,7 @@
 # -*- coding: UTF-8 -*-
 #练习gi
 #git练习2，推送
+#git124
 import frappe
 import xml.etree.ElementTree as ET
 import os
